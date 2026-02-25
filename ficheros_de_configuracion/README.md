@@ -27,7 +27,7 @@ Con este comando lanzamos la base de datos en MYSQL y lo que nos hace es crear e
 
 
 Por último ejecutamos el wordpress con el comando 
-
+```
 kubectl apply \-f wordpress-deployment.yml
-
+```
 Y este último comando nos acaba de lanzar un POD con el wordpress dentro, al cual nos conectaremos posteriormente con el balanceador de cargas  
