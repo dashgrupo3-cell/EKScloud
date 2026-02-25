@@ -14,7 +14,7 @@ Como segundo fichero que tenemos que ejecutar es el “pv-pvc.yml”
 ```
 kubectl apply -f pv-pvc.yml 
 ```
-Este comando lo que hace es crear 2 volúmenes. Para entenderlo mejor con 2 discos duros de 10 gigas de almacenamiento EBS uno para el MYSQL y otro para el Wordpress 
+Este comando lo que hace es crear 2 volúmenes. Para entenderlo mejor con 2 discos duros de 10 GB de almacenamiento EBS uno para el MYSQL y otro para el Wordpress 
 
 
 
