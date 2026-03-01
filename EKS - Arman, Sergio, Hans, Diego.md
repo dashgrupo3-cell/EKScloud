@@ -109,29 +109,29 @@ El siguiente diagrama ilustra cómo Amazon EKS integra los clústeres de Kuberne
 
 # Despliegue EKS: WordPress CON MySQL
 
-# Para realizar este despliegue primeramente en el cluster debemos agregar los drivers en add-on, en particular el siguiente:   ![][image1]
+Para realizar este despliegue primeramente en el cluster debemos agregar los drivers en add-on, en particular el siguiente:   ![][image1]
 
-# En este laboratorio, el objetivo es desplegar una página web completa con WordPress y su base de datos MySQL, todo gestionado dentro de un clúster de Kubernetes en Amazon (AWS EKS). Lo más interesante de esta práctica es que hace mucho hincapié en cómo no perder la información si algo falla, utilizando discos de almacenamiento persistente.
+En este laboratorio, el objetivo es desplegar una página web completa con WordPress y su base de datos MySQL, todo gestionado dentro de un clúster de Kubernetes en Amazon (AWS EKS). Lo más interesante de esta práctica es que hace mucho hincapié en cómo no perder la información si algo falla, utilizando discos de almacenamiento persistente.
 
-# Para montar todo esto, la arquitectura se divide en cuatro piezas clave que se configuran mediante archivos independientes. 
+ Para montar todo esto, la arquitectura se divide en cuatro piezas clave que se configuran mediante archivos independientes. 
 
-# Primero, se necesita gestionar las contraseñas de forma segura; para ello se usa un "Secreto" en Kubernetes que guarda la clave del usuario *root* de la base de datos de forma oculta (codificada en Base64). Después, entra en juego la persistencia: como los contenedores en Kubernetes son efímeros (si se reinician, se borra todo lo que tienen dentro), se configuran unas peticiones de volumen (llamadas PVC) para pedirle a Amazon dos discos duros externos de 10 GB. Uno guardará los datos puros del MySQL y el otro los archivos multimedia e instalación del WordPress.
+ Primero, se necesita gestionar las contraseñas de forma segura; para ello se usa un "Secreto" en Kubernetes que guarda la clave del usuario *root* de la base de datos de forma oculta (codificada en Base64). Después, entra en juego la persistencia: como los contenedores en Kubernetes son efímeros (si se reinician, se borra todo lo que tienen dentro), se configuran unas peticiones de volumen (llamadas PVC) para pedirle a Amazon dos discos duros externos de 10 GB. Uno guardará los datos puros del MySQL y el otro los archivos multimedia e instalación del WordPress.
 
-# Finalmente, se despliegan las dos aplicaciones. Por un lado, el contenedor de MySQL, que se queda protegido en la red interna del clúster y no tiene salida a internet. Por otro, el contenedor de WordPress, que se conecta a un balanceador de cargas (LoadBalancer) provisto por AWS para generarnos una URL pública desde la que podamos acceder a la web.
+Finalmente, se despliegan las dos aplicaciones. Por un lado, el contenedor de MySQL, que se queda protegido en la red interna del clúster y no tiene salida a internet. Por otro, el contenedor de WordPress, que se conecta a un balanceador de cargas (LoadBalancer) provisto por AWS para generarnos una URL pública desde la que podamos acceder a la web.
 
-# Antes de arrancar, el video menciona un detalle súper importante: para que Kubernetes sepa cómo pedirle esos discos duros a Amazon, el clúster debe tener instalado previamente un complemento (Add-on) llamado driver de EBS. Si esto no se ha configurado previamente en la consola de AWS, los volúmenes darán error y no se crearán.
+ Antes de arrancar, el video menciona un detalle súper importante: para que Kubernetes sepa cómo pedirle esos discos duros a Amazon, el clúster debe tener instalado previamente un complemento (Add-on) llamado driver de EBS. Si esto no se ha configurado previamente en la consola de AWS, los volúmenes darán error y no se crearán.
 
-# A la hora de ponerlo a funcionar en la terminal, el orden en el que ejecutamos los comandos es vital para que las piezas encajen correctamente:
+ A la hora de ponerlo a funcionar en la terminal, el orden en el que ejecutamos los comandos es vital para que las piezas encajen correctamente:
 
-# Primero, se aplica el archivo del secreto para que la contraseña exista antes de que la base de datos intente arrancar. · Luego, se solicitan los discos duros aplicando el archivo de volúmenes. Estos discos se quedan "en espera" hasta que las aplicaciones los reclamen. · A continuación, se levanta la base de datos MySQL, la cual se apropia automáticamente de su disco de 10 GB. · Por último, se lanza el WordPress. Este se conecta a la base de datos interna y le pide a AWS que nos levante el balanceador de cargas público.
+ Primero, se aplica el archivo del secreto para que la contraseña exista antes de que la base de datos intente arrancar. · Luego, se solicitan los discos duros aplicando el archivo de volúmenes. Estos discos se quedan "en espera" hasta que las aplicaciones los reclamen. · A continuación, se levanta la base de datos MySQL, la cual se apropia automáticamente de su disco de 10 GB. · Por último, se lanza el WordPress. Este se conecta a la base de datos interna y le pide a AWS que nos levante el balanceador de cargas público.
 
-# Una vez que todo está lanzado, el profesor no se queda solo en ver que los contenedores están encendidos, sino que realiza varias comprobaciones de diagnóstico (troubleshooting) muy útiles para documentar:
+ Una vez que todo está lanzado, el profesor no se queda solo en ver que los contenedores están encendidos, sino que realiza varias comprobaciones de diagnóstico (troubleshooting) muy útiles para documentar:
 
-# Utiliza comandos como **kubectl get all** y **kubectl get pvc** para tener una vista general de los recursos y comprobar que los discos se han asignado bien. · Entra de forma interactiva dentro del contenedor de MySQL usando una consola bash para comprobar que, efectivamente, la base de datos de WordPress se ha creado. · Lanza un contenedor temporal de pruebas solo para hacer un "ping" y revisar los puertos, asegurándose de que el WordPress y el MySQL se comunican bien por la red interna. · Simula un fallo borrando la contraseña a propósito. Aquí nos muestra cómo usar comandos como **kubectl describe pod** y **kubectl logs** para investigar y descubrir por qué un contenedor se queda bloqueado al arrancar.
+ Utiliza comandos como **kubectl get all** y **kubectl get pvc** para tener una vista general de los recursos y comprobar que los discos se han asignado bien. · Entra de forma interactiva dentro del contenedor de MySQL usando una consola bash para comprobar que, efectivamente, la base de datos de WordPress se ha creado. · Lanza un contenedor temporal de pruebas solo para hacer un "ping" y revisar los puertos, asegurándose de que el WordPress y el MySQL se comunican bien por la red interna. · Simula un fallo borrando la contraseña a propósito. Aquí nos muestra cómo usar comandos como **kubectl describe pod** y **kubectl logs** para investigar y descubrir por qué un contenedor se queda bloqueado al arrancar.
 
-# Para terminar, cuando el balanceador de cargas nos entrega la URL definitiva, basta con entrar desde el navegador para completar la instalación gráfica típica de WordPress (crear el administrador, ponerle nombre al blog, etc.). Y como buena práctica en la nube, el video concluye enseñando cómo destruir toda esta infraestructura de forma limpia, ejecutando el borrado de los archivos para eliminar los contenedores y liberar los discos duros, evitando así costes extra en AWS.
+Para terminar, cuando el balanceador de cargas nos entrega la URL definitiva, basta con entrar desde el navegador para completar la instalación gráfica típica de WordPress (crear el administrador, ponerle nombre al blog, etc.). Y como buena práctica en la nube, el video concluye enseñando cómo destruir toda esta infraestructura de forma limpia, ejecutando el borrado de los archivos para eliminar los contenedores y liberar los discos duros, evitando así costes extra en AWS.
 
-# 
+ 
 
 # PROYECTO Y OBJETIVO GENERAL {#proyecto-y-objetivo-general}
 
