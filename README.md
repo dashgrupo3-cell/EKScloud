@@ -3,7 +3,7 @@
 Armanjot Singh  
 Diego Miguel   
 Sergio Morales  
-Hans Jeremi
+Hans Gonzalez
 
 # ÍNDICE
 
